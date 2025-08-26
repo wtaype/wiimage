@@ -506,7 +506,7 @@ ${options.content}
 `);
 
 // Añadir modal al DOM
-$('body').append(modal);
+// $('body').append(modal);
 
 // Animar entrada
 modal.css('opacity', 0);
@@ -656,7 +656,8 @@ $('head').append(`
 </style>
 `);
 }
-}cargarModal();
+}
+// cargarModal();
 
 // ==============================
 // SISTEMA IP ULTRA COMPACTO - 24H CACHÉ
