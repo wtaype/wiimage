@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Wiimage - Plataforma de beneficios exclusivos. Únete y disfruta descuentos únicos.">
+<meta name="keywords" content="beneficios, descuentos, ofertas, recompensas">
+<link href="/wiimage/v11/logo.png" rel="icon" type="image/x-icon">
+
+<title>Wiimage - Contruye tu educación con las mejores herramientas</title>
+  <script type="module" crossorigin src="/wiimage/v11/assets/index-DOYA_LQ-.js"></script>
+  <link rel="stylesheet" crossorigin href="/wiimage/v11/assets/index-bej16MMH.css">
+</head>
+<!-- ...existing code... -->
+<body>
+    <!-- Header (mantener igual) -->
+    <header class="glass-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-graduation-cap logo-icon"></i>
+                <h1>wiimage</h1>
+                <span class="tagline">Tu pizarra personalizada con notepad y anotes en imágenes</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-glass btn-danger" id="clearAllBtn">
+                    <i class="fas fa-trash-alt"></i>
+                    Borrar todo
+                </button>
+                <div class="witemas dpf"></div>
+                <button class="btn-glass btn-primary" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                    Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Left Panel - Lista de Notas (18vw) -->
+        <aside class="notes-list-section glass-panel">
+            <div class="list-header">
+                <h3><i class="fas fa-list"></i> Lista de Notas</h3>
+                <button class="btn-glass btn-small" id="addNoteBtn">
+                    <i class="fas fa-plus"></i>
+                    Nueva
+                </button>
+            </div>
+            <div class="notes-list" id="notesList">
+                <!-- Se llenarán dinámicamente -->
+            </div>
+        </aside>
+
+        <!-- Center Panel - Editor de Notas (30vw) -->
+        <section class="notes-section glass-panel">
+            <div class="notes-header">
+                <h2><i class="fas fa-edit"></i> Editor de Notas</h2>
+                <div class="notes-toolbar">
+                    <button class="tool-btn" id="boldBtn" title="Negrita">
+                        <i class="fas fa-bold"></i>
+                    </button>
+                    <button class="tool-btn" id="italicBtn" title="Cursiva">
+                        <i class="fas fa-italic"></i>
+                    </button>
+                    <button class="tool-btn" id="underlineBtn" title="Subrayado">
+                        <i class="fas fa-underline"></i>
+                    </button>
+                    <button class="tool-btn" id="saveNoteBtn" title="Guardar nota">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="note-editor">
+                <textarea id="noteEditor" placeholder="Escribe tus notas aquí mientras prestas atención al profesor..."></textarea>
+            </div>
+        </section>
+
+        <!-- Right Panel - Galería de Imágenes (48vw) -->
+        <section class="gallery-section">
+            <div class="paste-area glass-panel" id="pasteArea">
+                <div class="paste-content">
+                    <i class="fas fa-clipboard paste-icon"></i>
+                    <h3>Área de Capturas</h3>
+                    <p>Presiona <kbd>Ctrl+V</kbd> para pegar capturas de pantalla</p>
+                </div>
+            </div>
+            
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Grid de 4x3 = 12 cuadritos para imágenes -->
+                <div class="gallery-slot empty" data-slot="1">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="2">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="3">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="4">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="5">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="6">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="7">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="8">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="9">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="10">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="11">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="gallery-slot empty" data-slot="12">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modales (mantener igual) -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Imagen</h3>
+                <div class="modal-actions">
+                    <button class="btn-icon" id="prevImageBtn" title="Anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn-icon" id="nextImageBtn" title="Siguiente">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="btn-icon" id="downloadImageBtn" title="Descargar">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn-icon" id="deleteImageBtn" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn-icon" id="closeModalBtn" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="">
+            </div>
+            <div class="modal-footer">
+                <div class="image-info">
+                    <span id="imageCounter">1 de 5</span>
+                    <span id="imageTimestamp"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content glass-modal small">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar acción</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">¿Estás seguro de que quieres realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-glass btn-danger" id="confirmYesBtn">
+                    <i class="fas fa-check"></i>
+                    Sí, continuar
+                </button>
+                <button class="btn-glass" id="confirmNoBtn">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+</body>
+<!-- ...existing code... -->
+</html>
