@@ -10,10 +10,10 @@ export const wiTema = (() => {
  const tms = [["Cielo","#0EBEFF"],["Dulce","#FF5C69"],["Paz","#29C72E"],["Mora","#7000FF"],["Futuro","#21273B"]], 
  set = el => {const [nm,co] = $(el).data('tema').split('|'); $('html').attr('data-theme',nm); 
  $('meta[name="theme-color"]').length ? $('meta[name="theme-color"]').attr('content',co) : $('<meta>',{name:'theme-color',content:co}).appendTo('head');
- savels('witema',`${nm}|${co}`,720); $('.mtha').removeClass('mtha'); $(el).addClass('mtha');};
- $('.witemas').html(tms.map(([n,c]) => `<div class="tema" data-tema="${n}|${c}" style="background:${c}"></div>`).join(''));
- const sav = getls('witema'), ini = $(`[data-tema="${sav}"]`)[0] || $('.mtha')[0] || $('[data-tema]').first()[0]; ini && set(ini);
- $(document).on('click', '[data-tema]', e => set(e.currentTarget));  return {set};
+ savels('witema',`${nm}|${co}`,720); $('.mtha').removeClass('mtha'); $(el).addClass('mtha');},
+ init = () => {$('.witemas').html(tms.map(([n,c]) => `<div class="tema" data-tema="${n}|${c}" style="background:${c}"></div>`).join('')); const sav = getls('witema'), ini = $(`[data-tema="${sav}"]`)[0] || $('.mtha')[0] || $('[data-tema]').first()[0]; ini && set(ini); $(document).off('click.witema').on('click.witema', '[data-tema]', e => set(e.currentTarget));};
+ $('.witemas').length ? init() : new MutationObserver(m => m.some(({addedNodes}) => [...addedNodes].some(n => n.querySelector?.('.witemas'))) && (init(), true)).observe(document.body, {childList: true, subtree: true});
+ return {set};
 })();
 
 // ==============================
@@ -27,20 +27,12 @@ export function adtm(se,cl,ti,tf){
   $(se).text(ti).addClass(cl).delay(1800).queue(q=>$(se).text(tf).removeClass(cl).dequeue())
 } 
 
-export const infoo = (()=> {
-  const f = () => {
-    const d=new Date();
-    $('.wty').text(d.getFullYear());
-    $('.wtu').text(d.toLocaleString());
-    $(document).off('click.infoo','.abw,.abwok').on('click.infoo','.abw,.abwok',function(){
-      const id=this.id||'';
-      if(navigator.clipboard&&id) navigator.clipboard.writeText(id).catch(()=>{});
-      $('.abwc').toggleClass('dpn');
-    });
-  };
-  try{$(f);}catch(_){document.addEventListener('DOMContentLoaded',f,{once:true});}
+export const infoo = (() => {
+  const f = () => {const d=new Date(); $('.wty').text(d.getFullYear()); $('.wtu').text(d.toLocaleString()); $(document).off('click.infoo','.abw,.abwok').on('click.infoo','.abw,.abwok',function(){const id=this.id||''; if(navigator.clipboard&&id) navigator.clipboard.writeText(id).catch(()=>{}); $('.abwc').toggleClass('dpn');});};
+  $('.wty,.wtu,.abw,.abwok').length ? f() : new MutationObserver(m => m.some(({addedNodes}) => [...addedNodes].some(n => n.querySelector?.('.wty,.wtu,.abw,.abwok'))) && (f(), true)).observe(document.body, {childList: true, subtree: true});
   return f;
 })();
+
 
 export const adup = (x, y) => {
   $(x).addClass('updating').text(y);
