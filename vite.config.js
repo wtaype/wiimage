@@ -1,13 +1,16 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { resolve } from 'path';
 
-export default defineConfig(() => {
-  const isCI = !!process.env.GITHUB_ACTIONS;
-  const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || '';
-  const tag = process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : '';
-  const isFirebase = process.env.FIREBASE_DEPLOY === '1';
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const vtag = env.VTAG || '';
 
-  const base = isFirebase ? './' : (isCI ? `/${repo}/${tag ? `${tag}/` : ''}` : './');
+  const base =
+    mode === 'pages' ? (env.BASE || './')
+    : mode === 'firebase' ? './'
+    : './';
+
+  const outDir = mode === 'tag' && vtag ? `dist/${vtag}` : 'dist';
 
   return {
     base,
@@ -19,7 +22,7 @@ export default defineConfig(() => {
           smiletop: resolve(__dirname, 'smiletop.html'),
         },
       },
-      outDir: 'dist',
+      outDir,
       emptyOutDir: true,
     },
     publicDir: 'public',

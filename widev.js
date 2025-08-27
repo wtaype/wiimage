@@ -68,14 +68,16 @@ export const Saludar = () => {
 }; 
 
 // AccederRol
-export const accederRol = (rol) => {
-  window.location.href = { smiletop: '/smiletop.html' }[rol] || '/smile.html';
-};
+// export const accederRol = (rol) => {
+//   window.location.href = { smiletop: '/smiletop.html' }[rol] || '/smile.html';
+// };
 
 // export const accederRol = (rol) => {
-//   const to = rol === 'smiletop' ? 'smiletop.html' : 'smile.html';
-//   window.location.href = new URL(to, window.location.href).toString();
-// }; En caso alternativa para nuestro proyecto 
+export const accederRol = (rol) => {
+  const to = rol === 'smiletop' ? 'smiletop.html' : 'smile.html';
+  const href = new URL(to, import.meta.env.BASE_URL).toString();
+  window.location.href = href;
+};
 
 // RIGHT NOTIFICATIONS WITH X 
 export function Notificacion(mensaje, tipo = 'error', tiempo= 3000) {
