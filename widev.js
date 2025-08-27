@@ -72,6 +72,11 @@ export const accederRol = (rol) => {
   window.location.href = { smiletop: '/smiletop.html' }[rol] || '/smile.html';
 };
 
+// export const accederRol = (rol) => {
+//   const to = rol === 'smiletop' ? 'smiletop.html' : 'smile.html';
+//   window.location.href = new URL(to, window.location.href).toString();
+// }; En caso alternativa para nuestro proyecto 
+
 // RIGHT NOTIFICATIONS WITH X 
 export function Notificacion(mensaje, tipo = 'error', tiempo= 3000) {
   const iconos = {

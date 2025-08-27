@@ -1,15 +1,23 @@
 import $ from 'jquery';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { auth, db } from './firebase/init.js';
-import { getFirestore,
-  setDoc, getDoc, deleteDoc, onSnapshot,
-  doc, collection, getDocs, serverTimestamp,
-  query, where, orderBy, limit } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth"; //Para detectar cambios Login 
 import { wiTema, Mensaje, Notificacion, savels, getls, removels, gosaves, getsaves, adtm, infoo} from './widev.js';
+import { wiAuth } from './wiauth.js'; //Para autenticación login, registro y Restablecer
 
-// $('.nt1').click(function(){
-//   alert('Funcionando  bb');
-// });
+// PARA LIMPIAR INICIO DE SESSION + CONECTARSE AL SESION 
+onAuthStateChanged(auth, async user => {
+  if(!user) return (removels('wiAuthIn'), removels('wiAuthRol'), SmilePublico());
+
+  if (getls('wiAuthIn')){
+    const cacheRol = getls('wiAuthRol');
+    if(cacheRol) return accederRol(cacheRol);  //Cache primero  
+
+    const busq = await getDocs(query(collection(db, 'smiles'), where('email', '==', user.email)));
+    accederRol(busq.docs[0]?.data()?.rol); // Luego hacemos consultas si no tiene, primera vez
+  } // Acceso cuando es autenticado de acuerdo a roles 
+});
+
 // PARA LAS NOTAS 
 // P1) Notas + persistencia
 gosaves('.txe','id',$e=>$e.html()); getsaves('.txe','id',($e,v)=>$e.html(v));
@@ -42,9 +50,10 @@ const sTb=()=>{if(!enEd()) return void $tb.find('i').removeClass('actv').addClas
 document.addEventListener('selectionchange',()=>{gSel(); sTb();}); $tx.on('keyup mouseup input',()=>{gSel(); sTb();}); gSel(); sTb();
 
 
+// ==============================
 // PARA LAS IMÁGENES + SLIDESHOW
+// ==============================
 
-// PARA LAS IMÁGENES + SLIDESHOW
 const $ps=$('.paste'), $bx=$('.ibx .bx'); $bx.each((i,e)=>$(e).attr('data-k',`im${i+1}`));
 const $vw=$('.vw'), $im=$('.vw img'), $th=$('.vw .th'); let ci=-1;
 const lst=()=>$bx.map((i,e)=>$(e).attr('data-src')?i:null).get();
