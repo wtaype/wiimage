@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  base: '/wiimage/',
   build: {
     rollupOptions: {
       input: {
@@ -11,5 +12,5 @@ export default defineConfig({
       }
     }
   },
-  publicDir: 'public' 
-}); 
+  publicDir: 'public'
+});
