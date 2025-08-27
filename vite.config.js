@@ -2,7 +2,8 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: './', // clave para GitHub Pages y tags (/v10)
+  root: __dirname,        // ya estás dentro de /wiimage
+  base: './',             // assets y links relativos
   build: {
     rollupOptions: {
       input: {
@@ -14,5 +15,5 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
   },
-  publicDir: 'public',
+  publicDir: resolve(__dirname, 'public'),
 });
