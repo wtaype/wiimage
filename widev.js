@@ -1,8 +1,5 @@
 import $ from 'jquery'; 
-import { Calendar } from '@fullcalendar/core'; // Calendario interactivo avanzado
-import dayGridPlugin from '@fullcalendar/daygrid'; // Plugin de vista mensual para FullCalendar
-import timeGridPlugin from '@fullcalendar/timegrid'; // Plugin de vista semanal/diaria para FullCalendar
-import interactionPlugin from '@fullcalendar/interaction'; // Plugin para eventos y arrastrar-soltar
+
 
 // ==============================
 // FUNCIONES DE TEMAS CON jQuery
@@ -25,6 +22,25 @@ export const wiTema = (() => {
 export const adrm = (a, b) => {
     $(a).addClass(b).siblings().removeClass(b);
 }; 
+
+export function adtm(se,cl,ti,tf){
+  $(se).text(ti).addClass(cl).delay(1800).queue(q=>$(se).text(tf).removeClass(cl).dequeue())
+} 
+
+export const infoo = (()=> {
+  const f = () => {
+    const d=new Date();
+    $('.wty').text(d.getFullYear());
+    $('.wtu').text(d.toLocaleString());
+    $(document).off('click.infoo','.abw,.abwok').on('click.infoo','.abw,.abwok',function(){
+      const id=this.id||'';
+      if(navigator.clipboard&&id) navigator.clipboard.writeText(id).catch(()=>{});
+      $('.abwc').toggleClass('dpn');
+    });
+  };
+  try{$(f);}catch(_){document.addEventListener('DOMContentLoaded',f,{once:true});}
+  return f;
+})();
 
 export const adup = (x, y) => {
   $(x).addClass('updating').text(y);
@@ -147,19 +163,6 @@ export const Mensaje = (mensaje, tipo = 'success') => {
     setTimeout(() => $alerta.fadeOut(300, () => $alerta.remove()), 3000);
 };
 
-// BANDERAS 
-export function flagUrl(countryCode) {
-  if (!countryCode || countryCode.length !== 2) return null;
-  return `https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${countryCode.toLowerCase()}.svg`;
-}
-
-export function hasFlag(countryCode) {
-  // Validación básica de códigos de país (2 letras)
-  return countryCode && 
-         countryCode.length === 2 && 
-         /^[A-Za-z]{2}$/.test(countryCode);
-}
-
 // Primer letra mayusculas
 export const Capi = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -269,101 +272,8 @@ export function getsaves(selector, attr, fn) {
   });
 }
 
- // ==============================
-// INYECTAR CSS MINIFICADO PARA MODALES (usando jQuery)
-// ==============================
-$(`<style>
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:100;justify-content:center;align-items:center;animation:fadeInModal 0.3s ease;}
-.modal.active{display:flex;}
-@keyframes fadeInModal{from{opacity:0;}to{opacity:1;}}
-.modal-content{background-color:#fff;border-radius:var(--border-radius);box-shadow:var(--shadow);width:90%;max-width:600px;max-height:90vh;overflow-y:auto;animation:slideInModal 0.3s ease;border-radius:1vh}
-@keyframes slideInModal{from{transform:translateY(-30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal-header{padding:20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;}
-.modal-title{color:var(--navy-blue);font-size:1.2rem;font-weight:600;}
-.close-modal{background:none;border:none;font-size:1.5rem;cursor:pointer;color:#777;transition:color 0.2s;}
-.close-modal:hover{color:var(--navy-blue);}
-.modal-body{padding:20px;}
-.modal-footer{padding:15px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:10px;}
-</style>`).appendTo('head');
 
-// ==============================
-// FUNCIONES DE MODALES CON jQuery
-// ==============================
 
-export const openModal = (modalId) => {
-  $(`#${modalId}`).addClass('active');
-  $('body').addClass('modal-open');
-};
-
-export const closeModal = (modalId) => {
-  $(`#${modalId}`).removeClass('active');
-  $('body').removeClass('modal-open');
-};
-
-export const closeAllModals = () => {
-  $('.modal').removeClass('active');
-  $('body').removeClass('modal-open');
-};
-
-export const initModalSystem = () => {
-  // Botón de cerrar
-  $(document).on('click', '.close-modal', () => closeAllModals());
-
-  // Click fuera del contenido del modal
-  $(document).on('click', '.modal', (e) => {
-    if ($(e.target).hasClass('modal')) {
-      closeAllModals();
-    }
-  });
-
-  // Tecla Escape
-  $(document).on('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeAllModals();
-    }
-  });
-};
-// Inicializamos los modales automáticamente
-initModalSystem();
-
-/* ============================================================
-   📌 EJEMPLO DE USO DEL MODAL - CÓDIGO HTML DE REFERENCIA
-   (Este bloque es solo guía y no se renderiza en JS)
-   ============================================================
-
-<div id="miModal" class="modal">
-  <div class="modal-content">
-    <!-- Encabezado del modal con título y botón de cierre -->
-    <div class="modal-header">
-      <h2 class="modal-title">Título del Modal</h2>
-      <button class="close-modal">&times;</button> <!-- Botón de cerrar (ícono ×) -->
-    </div>
-    <!-- Cuerpo del modal donde va el contenido principal -->
-    <div class="modal-body">
-      <p>Contenido del modal aquí.</p>
-    </div>
-    <!-- Pie del modal con botones de acción -->
-    <div class="modal-footer">
-      <button class="close-modal">Cerrar</button> <!-- Otro botón para cerrar -->
-    </div>
-  </div>
-</div>
-
-<!-- Botón de ejemplo para abrir el modal -->
-<button onclick="openModal('miModal')">Abrir Modal</button>
-
-============================================================ */
-
-// ==============================
-// TOOLTIPS PERSONALIZADOS - VERSIÓN MINIFICADA
-// ==============================
-/**
- * Sistema de tooltips con soporte para colores temáticos
- * @param {Element|jQuery|string} el - Elemento o selector
- * @param {string} texto - Texto del tooltip
- * @param {string} pos - Posición o tipo de mensaje (top|right|bottom|left|success|error|warning|info)
- * @param {number} tiempo - Tiempo en ms (0 para permanente)
- */
 export function witip(el, texto, pos = 'top', tiempo = 1800) {
   // Mapa de tipos de mensaje a colores
   const tipoColor = {
@@ -484,180 +394,7 @@ export const calcularEdad = (fechaNacimiento) => {
   return edad;
 };
 
-// Mostrar modal
-export function mostrarModal(options) {
-// Crear overlay y contenedor del modal
-const modal = $(`
-<div class="modal-overlay">
-<div class="modal-container">
-<div class="modal-header">
-<h3>${options.title}</h3>
-<button class="modal-close">&times;</button>
-</div>
-<div class="modal-content">
-${options.content}
-</div>
-<div class="modal-footer">
-<button class="sky-button modal-cancel">${options.cancelText || 'Cancelar'}</button>
-<button class="sky-button primary-button modal-confirm">${options.confirmText || 'Aceptar'}</button>
-</div>
-</div>
-</div>
-`);
 
-// Añadir modal al DOM
-// $('body').append(modal);
-
-// Animar entrada
-modal.css('opacity', 0);
-setTimeout(() => {
-modal.css({
-'opacity': 1,
-'transition': 'opacity 0.3s ease'
-});
-}, 10);
-
-// Eventos
-modal.find('.modal-close, .modal-cancel').on('click', function() {
-cerrarModal(modal);
-if (options.onCancel) {
-options.onCancel(modal);
-}
-});
-
-modal.find('.modal-confirm').on('click', function() {
-if (options.onConfirm) {
-options.onConfirm(modal);
-}
-});
-
-return modal;
-}
-
-// Cerrar modal
-export function cerrarModal(modal) {
-modal.css({
-'opacity': 0,
-'transition': 'opacity 0.3s ease'
-});
-
-setTimeout(() => {
-modal.remove();
-}, 300);
-}
-// Cargar nuestro modal 
-function cargarModal() {
-// Agregar estilos base para modales si no existen
-if ($('#modal-styles').length === 0) {
-$('head').append(`
-<style id="modal-styles">
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.modal-container {
-  background: var(--wb);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--box-shadow-lg);
-  border: 1px solid var(--bdr);
-  overflow: hidden;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(20px);
-  transition: transform 0.3s ease;
-}
-
-.modal-container.small {
-  max-width: 400px;
-}
-
-.modal-container.large {
-  max-width: 700px;
-}
-
-.modal-container.full {
-  max-width: 90%;
-  height: 90%;
-}
-
-.modal-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid var(--bdr);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: var(--fz_l1);
-  color: var(--txh);
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--tx);
-  padding: 0;
-  margin: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--mco);
-}
-
-.modal-content {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-  color: var(--tx);
-}
-
-.modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid var(--bdr);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-@media (max-width: 768px) {
-  .modal-container {
-      width: 95%;
-  }
-}
-</style>
-`);
-}
-}
-// cargarModal();
 
 // ==============================
 // SISTEMA IP ULTRA COMPACTO - 24H CACHÉ
@@ -720,83 +457,6 @@ export const wiip = (geo) => {
 
 // ...existing code...
 
-// ==============================
-// CALENDARIO ULTRA COMPACTO CON FULLCALENDAR
-// ==============================
-export const calendario = (tipo = 'default', selector = '.calendarioMain') => {
-  let calendar;
-  
-  const opciones = {
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
-    locale: 'es',
-    headerToolbar: {
-      left: 'dayGridMonth,timeGridWeek',
-      center: 'title',
-      right: 'today prev,next'
-    },
-    buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana' },
-    height: 'auto',
-    aspectRatio: 1.5,
-    
-    // 📝 MODO INTERACTIVO
-    ...(tipo === 'interactivo' && {
-      editable: true,
-      selectable: true,
-      events: getls('cal-eventos') || [],
-      
-      select: (info) => {
-        const titulo = prompt('Título del evento:');
-        if (titulo) {
-          const evento = {
-            id: Date.now(),
-            title: titulo,
-            start: info.start,
-            end: info.end,
-            allDay: info.allDay
-          };
-          calendar.addEvent(evento);
-          guardarEventos();
-        }
-        calendar.unselect();
-      },
-      
-      eventClick: (info) => {
-        if (confirm(`¿Eliminar "${info.event.title}"?`)) {
-          info.event.remove();
-          guardarEventos();
-        }
-      },
-      
-      eventDrop: guardarEventos,
-      eventResize: guardarEventos
-    })
-  };
-  
-  // 🚀 INICIALIZAR
-  calendar = new Calendar($(selector)[0], opciones);
-  calendar.render();
-  
-  // 💾 GUARDAR EVENTOS
-  const guardarEventos = () => {
-    const eventos = calendar.getEvents().map(e => ({
-      id: e.id,
-      title: e.title,
-      start: e.start,
-      end: e.end,
-      allDay: e.allDay
-    }));
-    savels('cal-eventos', eventos, 8760); // 1 año
-  };
-  
-  // 📊 API SIMPLE
-  return {
-    obtener: () => calendar,
-    agregar: (evento) => { calendar.addEvent(evento); guardarEventos(); },
-    ir: (fecha) => calendar.gotoDate(fecha),
-    vista: (vista) => calendar.changeView(vista)
-  };
-};
 
 
 // ==============================
@@ -808,9 +468,6 @@ const CONFIG = {
   fases: ['Luna nueva','Luna creciente','Cuarto creciente','Luna gibosa creciente','Luna llena','Luna gibosa menguante','Cuarto menguante','Luna menguante'],
   unidades: {años:'año|años', meses:'mes|meses', semanas:'semana|semanas', días:'día|días', horas:'hora|horas', minutos:'minuto|minutos', segundos:'segundo|segundos'}
 };
-
-// ...existing code...
-
 export const Tiempo = (param = new Date()) => {
   const calcDatos = f => {
     const d = new Date(f), [año,mes,dia] = [d.getFullYear(),d.getMonth(),d.getDate()];
