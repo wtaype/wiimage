@@ -1,17 +1,18 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { resolve } from 'path';
 
-export default defineConfig(() => {
-  const isCI = !!process.env.GITHUB_ACTIONS;
-  const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || '';
-  const tag = process.env.VTAG || '';
-  const isFirebase = process.env.FIREBASE_DEPLOY === '1';
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const version = env.VTAG || '';             // ej: v10
+  const isPages = mode === 'pages';
+  const isFirebase = mode === 'firebase';
+  const isTag = mode === 'tag' && version;
 
-  const base = isFirebase
-    ? '/'                                   // Firebase en raíz
-    : isCI
-      ? `/${repo}/${tag ? `${tag}/` : ''}`  // Pages: /repo[/v10/]/
-      : './';                               // dev local
+  const base = isPages
+    ? (env.BASE || './')                      // pon aquí /amwil/ o /wiimage/ si tu Pages no usa dominio propio
+    : './';
+
+  const outDir = isTag ? `dist/${version}` : 'dist';
 
   return {
     root: __dirname,
@@ -24,7 +25,7 @@ export default defineConfig(() => {
           smiletop: resolve(__dirname, 'smiletop.html'),
         },
       },
-      outDir: 'dist',
+      outDir,
       emptyOutDir: true,
     },
     publicDir: resolve(__dirname, 'public'),
