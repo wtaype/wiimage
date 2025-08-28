@@ -39,7 +39,7 @@ function smileContenido(wi){
   <nav class="nv dfw wdp">
   <a class="logo nv_left" href="#Logo">
       <h1>
-          <span class="nv_titulo"><i class="fas fa-graduation-cap logo-icon"></i> wiimage3</span>
+          <span class="nv_titulo"><i class="fas fa-graduation-cap logo-icon"></i> wiimage</span>
           <span class="nv_descri">| Tu pizarra personalizada con notepad y anotes en imágenes</span>
       </h1>
   </a>
