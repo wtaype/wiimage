@@ -32,7 +32,7 @@ $(document).on('click','.bt_cargar',()=>{
 // DIOS SIEMPRE ES BUENO Y YO AMO A DIOS [START]
 function smileContenido(wi){
   console.log(wi.nombre);
-  Mensaje('Hola ' + wi.nombre);
+  Mensaje('Bienvenido ' + wi.nombre + '!');
 // HTML CONTENIDO [Start] 
   $('.app').html(`
     <header class="hd">
@@ -88,9 +88,10 @@ function smileContenido(wi){
     </section>
 
   <section class="swb images psr">
-    <div class="paste wbg dfc">
-      Área de Capturas.   
-      Presiona Ctrl+V para pegar capturas de pantalla. 
+  <div class="paste wbg dfc">
+      <p>Área de Capturas.</p>
+      <p>Presiona Ctrl+V para pegar capturas de pantalla.</p> 
+      <p>Doble click para seleccionar imagen</p>
     </div>
     <div class="ibx">
       <div class="bx bx1"></div><div class="bx bx2"></div><div class="bx bx3"></div><div class="bx bx4"></div>
