@@ -151,6 +151,7 @@ export const Mensaje = (mensaje, tipo = 'success') => {
             gap: 10px;
             min-width: 300px;
             max-width: 90%;
+            
         ">
             <i class="fas ${icon}"></i>
             <span>${mensaje}</span>

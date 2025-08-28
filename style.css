@@ -467,15 +467,20 @@ transition:.5s ease-in-out;
     gap: 1vh;
 }
 
-.wbg, .ibx>*, .nts *{
+.wbg, .ibx>*, .nts>*{
     padding: 1vh;
     background: var(--F);
     box-shadow:0 0.1vh 0.1vw 0 var(--bga);
     border-radius: .5vh;
 }
 .paste{
+    cursor: pointer;
     height: 15vh;
+    flex-direction: column;
     border: .3vh dotted var(--bga);
+}
+.paste p{
+    font-size: var(--fz_s3);
 }
 .ibx{
     gap: 1vh;
@@ -498,7 +503,7 @@ transition:.5s ease-in-out;
     padding-block: 1vh;
     
 }
-.nts *{
+.nts>*{
     width: 100%;
     height: 6vh;
     font-size: var(--fz_s3);
@@ -548,13 +553,21 @@ position:relative;
 border-radius:.5vh;
 overflow:hidden;
 cursor:pointer;
-background:var(--F)
+background:var(--F);
+padding: .5vh;
 }
 .ibx .bx img{
 width:100%;
 height:100%;
 object-fit:cover;
-display:block
+display:block;
+border-radius: .5vh;
+}
+.bx i {
+    position: absolute;
+    top: .7vh;
+    right: .7vh;
+    color:var(--mco)
 }
 .vw{
 position:fixed;
@@ -563,7 +576,7 @@ background:rgba(0,0,0,.9);
 display:none;
 align-items:center;
 justify-content:center;
-z-index:9999
+z-index:7
 }
 .vw.show{
 display:flex
@@ -595,6 +608,10 @@ right:4rem
 top:1rem;
 right:7rem
 }
+.vw .dw {
+    top: 1rem;
+    right: 10rem;
+}
 .vw .pv{
 left:1rem;
 top:50%;
@@ -612,7 +629,7 @@ background:rgba(0,0,0,.9);
 display:none;
 align-items:center;
 justify-content:center;
-z-index:9999
+z-index:7
 }
 .vw.show{
 display:flex
@@ -683,10 +700,9 @@ height:100%;
 object-fit:cover;
 display:block
 }
-.vw .ic:hover, .vw .ic:hover{
+.vw .pv:hover, .vw .nx:hover{
     transform:translateY(-2.5vh);
     transition: .3s ease-in-out;
-
 }
 .vw .th .ti:hover{
 opacity:1;
@@ -696,6 +712,16 @@ transform:scale(1.03)
 .vw .th .ti.on{
 border-color:#fff;
 opacity:1
+}
+.nts .nt {
+    display: flex;
+    justify-content: space-around;
+}
+
+.nts .activa i {color: var(--txa);}
+
+.nts i {
+    color: var(--svg);
 }
 
 @media (max-width:770px){
@@ -708,7 +734,7 @@ opacity:1
   .miwb{grid-template-columns:1fr; gap:1.2vh}
   .notas{grid-template-columns:1fr}
   .hcon{gap:.6vh; height:auto; padding:.6vh; overflow-x:auto}
-  .nts *{height:5.4vh}
+  .nts>*{height:5.4vh}
   .swb{height:auto}
   .txe{min-height:60vh}
   .paste{height:18vh}
@@ -740,7 +766,7 @@ opacity:1
   .paste{height:16vh}
   .ibx{grid-template-columns:repeat(2,1fr)}
   .ibx *{height:18vh}
-  .nts *{height:5vh; font-size:var(--fz_s2)}
+  .nts>*{height:4.5vh; font-size:var(--fz_s2)}
   .vw img{max-width:96vw; max-height:68vh}
   .vw .ic{padding:.5rem}
   .vw .pv, .vw .nx{top:auto; bottom:6.5rem; transform:none} /* controles más accesibles */

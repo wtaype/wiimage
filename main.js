@@ -2,12 +2,12 @@ import $ from 'jquery';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { auth, db } from './firebase/init.js';
 import { onAuthStateChanged } from "firebase/auth"; //Para detectar cambios Login 
-import { wiTema, Mensaje, Notificacion, savels, getls, removels, gosaves, getsaves, adtm, infoo} from './widev.js';
+import { wiTema, Mensaje, Notificacion, savels, getls, removels, gosaves, getsaves, adtm, infoo, accederRol } from './widev.js';
 import { wiAuth } from './wiauth.js'; //Para autenticación login, registro y Restablecer
 
 // PARA LIMPIAR INICIO DE SESSION + CONECTARSE AL SESION 
 onAuthStateChanged(auth, async user => {
-  if(!user) return (removels('wiAuthIn'), removels('wiAuthRol'), SmilePublico());
+  if(!user) return (removels('wiAuthIn'), removels('wiAuthRol'));
 
   if (getls('wiAuthIn')){
     const cacheRol = getls('wiAuthRol');
@@ -22,7 +22,7 @@ onAuthStateChanged(auth, async user => {
 // P1) Notas + persistencia
 gosaves('.txe','id',$e=>$e.html()); getsaves('.txe','id',($e,v)=>$e.html(v));
 const $tx=$('.txe'), $nt=$('.nts'), $tb=$('.editor .hcon'); let cont=0;
-const idn=s=>+String(s).replace(/\D+/g,'')||0, txt=(h,l=28)=>$('<div>').html(h||'').text().replace(/\s+/g,' ').trim().slice(0,l);
+const idn=s=>+String(s).replace(/\D+/g,'')||0, txt=(h,l=34)=>$('<div>').html(h||'').text().replace(/\s+/g,' ').trim().slice(0,l);
 const act=id=>($('[data-ki^="ki"]').removeClass('activa'),$(`[data-ki="${id}"]`).addClass('activa'));
 const chip=(id,t)=>{const $c=$(`[data-ki="${id}"]`); $c.length?$c.text(t):$(`<div class="nt nt${idn(id)}" data-ki="${id}">${t}</div>`).appendTo($nt);};
 const carg=id=>{const v=getls(id)||''; $tx.attr('id',id).html(v).focus(); act(id);};

@@ -20,7 +20,13 @@ onAuthStateChanged(auth, async user => {
 });
 $(document).on('click', '.bt_salir', async () => {
   await signOut(auth); window.location.href = '/';   // Cierra la sesión + Envia al inicio 
+  try{localStorage.clear();}catch(_){Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));} //Limpieza de localStorage
 });
+$(document).on('click','.bt_cargar',()=>{
+  const pattern=/^(im\d+|ki\d+|remote:im\d+|dirty:im\d+|dirty:ki\d+)$/;
+  Object.keys(localStorage).filter(k=>pattern.test(k)).forEach(k=>localStorage.removeItem(k));
+  Mensaje('Actualizado'); setTimeout(()=>location.reload(),800);
+}); // Actualizar la parte de imagen 
 
 
 // DIOS SIEMPRE ES BUENO Y YO AMO A DIOS [START]
@@ -33,13 +39,14 @@ function smileContenido(wi){
   <nav class="nv dfw wdp">
   <a class="logo nv_left" href="#Logo">
       <h1>
-          <span class="nv_titulo"><i class="fas fa-graduation-cap logo-icon"></i> wiimage</span>
-          <span class="nv_descri">| Tu pizarra personalizada con notepad y anotes en imágenes 15</span>
+          <span class="nv_titulo"><i class="fas fa-graduation-cap logo-icon"></i> wiimage3</span>
+          <span class="nv_descri">| Tu pizarra personalizada con notepad y anotes en imágenes</span>
       </h1>
   </a>
   <div class="logo nv_right dfw">
       
       <div class="witemas dpf"></div>
+      <button class="bt_cargar"><i class="fa-solid fa-arrow-rotate-right"></i></button>
       <button class="bt_login"><i class="fas fa-user"></i> ${wi.nombre}</button>
       <button class="bt_salir"><i class="fas fa-sign-out-alt"></i> Salir</button>
   </div>
@@ -93,6 +100,7 @@ function smileContenido(wi){
 
       <!-- Visor fullscreen -->
     <div class="vw" aria-hidden="true">
+      <button class="ic dw"  title="Anterior (<)"><i class="fa-solid fa-cloud-arrow-up"></i></button>
       <button class="ic cls" title="Cerrar (Esc)"><i class="fa-solid fa-xmark"></i></button>
       <button class="ic dl"  title="Descargar (Ctrl+S)"><i class="fa-solid fa-download"></i></button>
       <button class="ic rm"  title="Eliminar (Supr)"><i class="fa-solid fa-trash"></i></button>
@@ -132,18 +140,34 @@ function smileContenido(wi){
 `); // HTML CONTENIDO [End] 
 
 // JQUERY CONTENIDO JS [Start] 
+// ...existing code...
 // NOTAS: local 12h, sync batch, live, y borrar remoto
 gosaves('.txe','id',$e=>$e.html()); getsaves('.txe','id',($e,v)=>$e.html(v));
 
 const $edt=$('.txe'), $lis=$('.nts'), $bar=$('.editor .hcon'); let cnt=0;
-const idki=s=>+String(s).replace(/\D+/g,'')||0, prev=(h,l=28)=>$('<div>').html(h||'').text().replace(/\s+/g,' ').trim().slice(0,l);
+const idki=s=>+String(s).replace(/\D+/g,'')||0, prev=(h,l=22)=>$('<div>').html(h||'').text().replace(/\s+/g,' ').trim().slice(0,l);
 const actv=id=>($('[data-ki^="ki"]').removeClass('activa'),$(`[data-ki="${id}"]`).addClass('activa'));
-const fich=(id,t)=>{const $c=$(`[data-ki="${id}"]`); $c.length?$c.text(t):$(`<div class="nt nt${idki(id)}" data-ki="${id}">${t}</div>`).appendTo($lis);};
-const carg=id=>{const v=getls(id)||''; $edt.attr('id',id).html(v).focus(); actv(id);};
-const kils=()=>Object.keys(localStorage).filter(k=>/^ki\d+$/.test(k));
-const kdir=id=>`dirty:${id}`, krem=id=>`remote:${id}`;
+const krem=id=>`remote:${id}`, kdir=id=>`dirty:${id}`, kils=()=>Object.keys(localStorage).filter(k=>/^ki\d+$/.test(k));
+const titl=v=>{const t=prev(v); return t?(t+'...'):'';};
 
-const init=()=>{const ch=$('[data-ki^="ki"]').map((i,e)=>idki($(e).data('ki'))).get(); const ks=kils(); cnt=Math.max(cnt,0,...ch,...ks.map(idki)); $.each(ks,(_,id)=>{const v=getls(id); v&&fich(id,prev(v)+'...')});};
+// Chip: texto + icono nube si está remoto
+const fich=(id,t)=>{
+  const put=$el=>{
+    $el.empty().text(t||'');
+    if(getls(krem(id))) $el.append(' ').append($('<i class="fa-solid fa-cloud-arrow-up"></i>'));
+  };
+  const $c=$(`[data-ki="${id}"]`);
+  $c.length?put($c):put($(`<div class="nt nt${idki(id)}" data-ki="${id}"></div>`).appendTo($lis));
+};
+
+const carg=id=>{const v=getls(id)||''; $edt.attr('id',id).html(v).focus(); actv(id);};
+
+const init=()=>{
+  const ch=$('[data-ki^="ki"]').map((i,e)=>idki($(e).data('ki'))).get();
+  const ks=kils();
+  cnt=Math.max(cnt,0,...ch,...ks.map(idki));
+  $.each(ks,(_,id)=>{const v=getls(id); v&&fich(id,titl(v));});
+};
 
 const okgd=(()=>{let t;return(ms=1600)=>{const $b=$('.guardar_nota');if(!$b.length)return;$b.addClass('bta').text('Guardado');clearTimeout(t);t=setTimeout(()=>{$b.removeClass('bta').text('Guardar');},ms);};})();
 
@@ -153,7 +177,11 @@ const hidr = async () => {
   try{
     const qy=query(collection(db,'smilenotas'), where('email','==',email), limit(100));
     const sn=await getDocs(qy); let mx=0;
-    sn.forEach(ds=>{const d=ds.data(), id=d.ki||'ki0', html=d.nota||''; savels(id,html,12); savels(krem(id),1,720); fich(id,prev(html)+'...'); mx=Math.max(mx,idki(id));});
+    sn.forEach(ds=>{
+      const d=ds.data(), id=d.ki||'ki0', html=d.nota||'';
+      savels(id,html,12); savels(krem(id),1,720);
+      fich(id,titl(html)); mx=Math.max(mx,idki(id));
+    });
     cnt=Math.max(cnt,mx);
   }catch(e){console.error('Hydrate error:',e);}
 };
@@ -161,7 +189,8 @@ const hidr = async () => {
 // Sync batch solo dirty
 const sinc = async ({silent=false}={})=>{
   const u=auth.currentUser, email=u?.email, usuario=u?.displayName||wi?.nombre||''; if(!email) return;
-  const ids=kils().filter(id=>!!getls(kdir(id))).slice(0,100); if(!ids.length){ if(!silent) Mensaje('Nada que sincronizar'); return; }
+  const ids=kils().filter(id=>!!getls(kdir(id))).slice(0,100);
+  if(!ids.length){ if(!silent) Mensaje('Nada que sincronizar'); return; }
   const bat=writeBatch(db);
   ids.forEach(id=>{
     const html=getls(id)||'', titulo=prev(html,22), rf=doc(db,'smilenotas',`${email}_${id}`);
@@ -171,7 +200,7 @@ const sinc = async ({silent=false}={})=>{
   });
   try{
     await bat.commit();
-    ids.forEach(id=>{savels(krem(id),1,720); removels(kdir(id));});
+    ids.forEach(id=>{savels(krem(id),1,720); removels(kdir(id)); fich(id,titl(getls(id)));});
     if(!silent) Mensaje('Notas guardadas en la nube');
     okgd();
   }catch(e){console.error('Sync error:',e); if(!silent) Notificacion('Error al sincronizar notas','error');}
@@ -193,35 +222,61 @@ const elim = async id=>{
 
 // Live updates (no pisa “dirty”)
 let unsub=null;
-const subn=()=>{const u=auth.currentUser, email=u?.email; if(!email) return; if(typeof unsub==='function') try{unsub();}catch(_){}
+const subn=()=>{
+  const u=auth.currentUser, email=u?.email; if(!email) return;
+  if(typeof unsub==='function') try{unsub();}catch(_){}
   const qy=query(collection(db,'smilenotas'), where('email','==',email), limit(100));
   unsub=onSnapshot(qy, sn=>{
     let mx=cnt;
     sn.docChanges().forEach(ch=>{
       const d=ch.doc.data()||{}, id=d.ki||(ch.doc.id.split('_')[1]||'ki0'), html=d.nota||'';
-      if(ch.type==='removed') return; // lo maneja elim() cuando haces click
-      if(!getls(kdir(id))){ savels(id,html,12); savels(krem(id),1,720); if($edt.attr('id')===id) $edt.html(html); }
-      fich(id, prev(getls(id)||html)+'...'); mx=Math.max(mx,idki(id));
+      if(ch.type==='removed') return; // lo maneja elim()
+      if(!getls(kdir(id))){
+        savels(id,html,12); savels(krem(id),1,720);
+        if($edt.attr('id')===id) $edt.html(html);
+      }
+      fich(id, titl(getls(id)||html)); mx=Math.max(mx,idki(id));
     });
     cnt=Math.max(cnt,mx);
-    if(!$edt.attr('id')){ const ks=kils().sort((a,b)=>idki(a)-idki(b)); ks.length&&carg(ks.includes('ki0')?'ki0':ks[0]); }
+    if(!$edt.attr('id')){
+      const ks=kils().sort((a,b)=>idki(a)-idki(b));
+      ks.length&&carg(ks.includes('ki0')?'ki0':ks[0]);
+    }
   }, e=>console.error('Snapshot notas error:',e));
 };
 
 // Eventos
-$edt.on('input',()=>{const id=$edt.attr('id'); if(!id) return; savels(id,$edt.html(),12); savels(kdir(id),1,12); const t=prev(getls(id)); t&&$(`[data-ki="${id}"]`).text(t+'...'); okgd();});
+$edt.on('input',()=>{
+  const id=$edt.attr('id'); if(!id) return;
+  savels(id,$edt.html(),12); savels(kdir(id),1,12);
+  fich(id, titl(getls(id)));
+  okgd();
+});
 
-$(document).on('click','.guardar_nota',async()=>{const id=$edt.attr('id'); if(id){savels(id,$edt.html(),12); savels(kdir(id),1,12);} await sinc({silent:false});});
+$(document).on('click','.guardar_nota',async()=>{
+  const id=$edt.attr('id');
+  if(id){savels(id,$edt.html(),12); savels(kdir(id),1,12);}
+  await sinc({silent:false});
+});
 
-$(document).on('click','.agregar_nota',()=>{const tot=kils().length; if(tot>=100) return Notificacion('Máximo 100 notas por usuario','warning'); const id=`ki${++cnt}`; fich(id,`Nota ${cnt}`); carg(id);});
+$(document).on('click','.agregar_nota',()=>{
+  const tot=kils().length; if(tot>=100) return Notificacion('Máximo 100 notas por usuario','warning');
+  const id=`ki${++cnt}`; fich(id,`Nota ${cnt}`); carg(id);
+});
 $(document).on('click','[data-ki^="ki"]',e=>carg($(e.currentTarget).data('ki')));
-$(document).on('click','.limpiar_nota',async function(){const id=$edt.attr('id'); if(!id) return; await elim(id); adtm(this,'bta','Eliminado','Eliminar');});
+$(document).on('click','.limpiar_nota',async function(){
+  const id=$edt.attr('id'); if(!id) return; await elim(id); adtm(this,'bta','Eliminado','Eliminar');
+});
 
 // Intento silencioso al ocultar/cerrar
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') sinc({silent:true}); });
 
 // Init
-(async()=>{ init(); await hidr(); subn(); const ks=kils().sort((a,b)=>idki(a)-idki(b)); if(ks.length && !$edt.html()) carg(ks.includes('ki0')?'ki0':ks[0]);})();
+(async()=>{
+  init(); await hidr(); subn();
+  const ks=kils().sort((a,b)=>idki(a)-idki(b));
+  if(ks.length && !$edt.html()) carg(ks.includes('ki0')?'ki0':ks[0]);
+})();
 
 // Toolbar editor (corto)
 const CMD={'.fa-bold':'bold','.fa-italic':'italic','.fa-underline':'underline','.fa-list-ul':'insertUnorderedList','.fa-list-ol':'insertOrderedList','.fa-align-left':'justifyLeft','.fa-align-center':'justifyCenter','.fa-align-right':'justifyRight','.fa-rotate-left':'undo'};
@@ -236,58 +291,177 @@ const stbr=()=>{if(!ened()) return void $bar.find('i').removeClass('actv').addCl
 document.addEventListener('selectionchange',()=>{gsel(); stbr();}); $edt.on('keyup mouseup input',()=>{gsel(); stbr();}); gsel(); stbr();
 
 // ==============================
-// PARA LAS IMÁGENES + SLIDESHOW
+// IMÁGENES: optimizadas + Firebase + Drag&Drop + Sync Manual
 // ==============================
-
 const $ps=$('.paste'), $bx=$('.ibx .bx'); $bx.each((i,e)=>$(e).attr('data-k',`im${i+1}`));
 const $vw=$('.vw'), $im=$('.vw img'), $th=$('.vw .th'); let ci=-1;
-const lst=()=>$bx.map((i,e)=>$(e).attr('data-src')?i:null).get();
-const thumb=()=>{const L=lst(); $th.empty().append(L.map(i=>`<div class="ti" data-i="${i}"><img src="${$bx.eq(i).attr('data-src')}"></div>`)); $th.find(`[data-i="${ci}"]`).addClass('on');};
-const set=(i,src)=>{const $b=$bx.eq(i); $b.attr('data-src',src).addClass('fill').html(`<img src="${src}">`); savels($b.attr('data-k'),src,720); thumb();};
+const ikr=id=>`remote:${id}`, ikd=id=>`dirty:${id}`;
+
+// Optimizar imagen (WebP/JPEG <=200KB) - más eficiente
+const icmp=async(file,maxW=1600,maxKB=200)=>{
+  const du=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(file)});
+  const img=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=du;});
+  const ratio=Math.min(1,maxW/img.naturalWidth), [w,h]=[Math.round(img.naturalWidth*ratio),Math.round(img.naturalHeight*ratio)];
+  const cv=Object.assign(document.createElement('canvas'),{width:w,height:h}); cv.getContext('2d').drawImage(img,0,0,w,h);
+  const fmt=cv.toDataURL('image/webp').startsWith('data:image/webp')?'image/webp':'image/jpeg';
+  let [q,url]=[0.9,''];
+  for(let i=0;i<6&&q>=0.5;i++,q=(q+0.5)/2){
+    url=cv.toDataURL(fmt,q);
+    if(Math.ceil((url.length-(`data:${fmt};base64,`).length)*3/4)<=maxKB*1024) break;
+  } return url;
+};
+
+// UI helpers optimizados
+const lst=()=>$bx.map((i,e)=>$(e).attr('data-src')?i:null).get().filter(x=>x!==null);
+const upd=($e,k)=>{if(getls(ikr(k||$e.attr('data-k')))&&!$e.find('.fa-cloud-arrow-up').length) $e.append(' <i class="fa-solid fa-cloud-arrow-up"></i>');};
+const thumb=()=>{const L=lst(); $th.html(L.map(i=>`<div class="ti" data-i="${i}"><img src="${$bx.eq(i).attr('data-src')}">${getls(ikr($bx.eq(i).attr('data-k')))?'<i class="fa-solid fa-cloud-arrow-up"></i>':''}</div>`).join('')); $th.find(`[data-i="${ci}"]`).addClass('on');};
+const set=(i,src)=>{const $b=$bx.eq(i), k=$b.attr('data-k'); $b.attr('data-src',src).addClass('fill').html(`<img src="${src}">`); upd($b,k); savels(k,src,720); savels(ikd(k),1,12); thumb();};
 const emp=()=>$bx.toArray().findIndex(e=>!$(e).attr('data-src'));
-const put=src=>{let i=emp(); if(i<0)i=0; set(i,src);};
-const rea=f=>{const r=new FileReader(); r.onload=()=>put(r.result); r.readAsDataURL(f);};
-const take=fs=>Array.from(fs).forEach(f=>f&&/^image\//.test(f.type)&&rea(f));
-$ps.on('paste',e=>{const d=e.originalEvent.clipboardData; d&&take(Array.from(d.items).map(x=>x.getAsFile()).filter(Boolean));});
-$ps.on('dblclick',()=>{ $('<input type="file" accept="image/*" multiple hidden>').appendTo('body').on('change',e=>{take(e.target.files); $(e.target).remove();}).trigger('click'); });
+const rea=async f=>{const opt=await icmp(f); set(emp()>=0?emp():0,opt);};
+const take=fs=>[...fs].filter(f=>f?.type?.startsWith('image/')).forEach(rea);
 
-getsaves('.ibx .bx','data-k',($e,v)=>{ if(v){ $e.attr('data-src',v).addClass('fill').html(`<img src="${v}">`); } }); gosaves('.ibx .bx','data-k',$e=>$e.attr('data-src')||'');
-thumb();
+// Eventos: pegar + DRAG&DROP + subir (FIXED)
+$ps.on('paste',e=>{const d=e.originalEvent.clipboardData; d&&take([...d.items].map(x=>x.getAsFile()).filter(Boolean));});
+$ps.on('dblclick',()=>$('<input type="file" accept="image/*" multiple hidden>').appendTo('body').on('change',e=>{take(e.target.files); $(e.target).remove();}).trigger('click'));
 
-// Visor fullscreen + atajos
-const show=i=>{const s=$bx.eq(i).attr('data-src'); if(!s)return; ci=i; $im.attr('src',s); $vw.addClass('show'); $th.find('.ti').removeClass('on'); $th.find(`[data-i="${i}"]`).addClass('on'); const $ti=$th.find(`[data-i="${i}"]`); $ti.length&&$th.animate({scrollLeft:Math.max(0,$ti.position().left+$th.scrollLeft()-($th.width()-$ti.width())/2)},180);};
+// DRAG & DROP FIXED - Prevenir navegación
+$ps.on('dragover dragenter',e=>{e.preventDefault(); e.stopPropagation();});
+$ps.on('drop',e=>{e.preventDefault(); e.stopPropagation(); const dt=e.originalEvent.dataTransfer; dt?.files?.length&&take(dt.files);});
+$(document).on('dragover drop',e=>e.preventDefault()); // Global fallback
+
+// Cargar imágenes guardadas localmente
+const load=()=>{getsaves('.ibx .bx','data-k',($e,v)=>{if(v){$e.attr('data-src',v).addClass('fill').html(`<img src="${v}">`); upd($e);}}); gosaves('.ibx .bx','data-k',$e=>$e.attr('data-src')||''); thumb();};
+load();
+
+// OPCIÓN 1: Auto-sync (silencioso al ocultar pestaña)
+const isyn=async({silent=false}={})=>{
+  const {currentUser:u}=auth, email=u?.email, usuario=u?.displayName||wi?.nombre||''; if(!email) return;
+  const dirty=$bx.filter((i,e)=>{const k=$(e).attr('data-k'); return $(e).attr('data-src')&&getls(ikd(k));}).get();
+  if(!dirty.length) return silent||Mensaje('Nada que sincronizar');
+  
+  const bat=writeBatch(db);
+  dirty.forEach(el=>{
+    const $e=$(el), [k,src]=[$e.attr('data-k'),$e.attr('data-src')], rf=doc(db,'smileimgs',`${email}_${k}`);
+    const dt={email,usuario,titulo:`Imagen ${k.replace('im','')}`,imagen:src,actualizacion:serverTimestamp()};
+    if(!getls(ikr(k))) dt.creacion=serverTimestamp();
+    bat.set(rf,dt,{merge:true});
+  });
+  
+  try{
+    await bat.commit();
+    dirty.forEach(el=>{const $e=$(el), k=$e.attr('data-k'); savels(ikr(k),1,720); removels(ikd(k)); upd($e,k);});
+    if(!silent) Mensaje('Imágenes guardadas en la nube');
+    okgd?.(); thumb();
+  }catch(e){console.error('Sync imgs error:',e); !silent&&Notificacion('Error al sincronizar imágenes','error');}
+};
+
+// OPCIÓN 2: Sync manual con botón .dw (para móviles)
+const syncManual=async()=>{
+  const {currentUser:u}=auth, email=u?.email, usuario=u?.displayName||wi?.nombre||''; if(!email) return Notificacion('Debes iniciar sesión','error');
+  const dirty=$bx.filter((i,e)=>{const k=$(e).attr('data-k'); return $(e).attr('data-src')&&getls(ikd(k));}).get();
+  if(!dirty.length) return Mensaje('No hay imágenes nuevas para guardar');
+  
+  // Mostrar progreso
+  const $btn=$('.vw .dw'); $btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled',true);
+  
+  const bat=writeBatch(db);
+  dirty.forEach(el=>{
+    const $e=$(el), [k,src]=[$e.attr('data-k'),$e.attr('data-src')], rf=doc(db,'smileimgs',`${email}_${k}`);
+    const dt={email,usuario,titulo:`Imagen ${k.replace('im','')}`,imagen:src,actualizacion:serverTimestamp()};
+    if(!getls(ikr(k))) dt.creacion=serverTimestamp();
+    bat.set(rf,dt,{merge:true});
+  });
+  
+  try{
+    await bat.commit();
+    dirty.forEach(el=>{const $e=$(el), k=$e.attr('data-k'); savels(ikr(k),1,720); removels(ikd(k)); upd($e,k);});
+    Mensaje('Guardado en nube'); // Mensaje específico para sync manual
+    thumb();
+  }catch(e){
+    console.error('Manual sync error:',e); 
+    Notificacion('Error al guardar en la nube','error');
+  }finally{
+    // Restaurar botón
+    $btn.html('<i class="fa-solid fa-cloud-arrow-up"></i>').prop('disabled',false);
+  }
+};
+
+// Hidratar desde Firebase (si local vacío)
+const ihid=async()=>{
+  const {currentUser:u}=auth, email=u?.email; if(!email||lst().length) return;
+  try{
+    const sn=await getDocs(query(collection(db,'smileimgs'),where('email','==',email),limit(60)));
+    sn.forEach(ds=>{
+      const {imagen:src,...d}=ds.data()||{}, k=ds.id.split('_')[1]||'im1', $b=$bx.filter(`[data-k="${k}"]`);
+      if($b.length&&src){$b.attr('data-src',src).addClass('fill').html(`<img src="${src}">`); savels(k,src,720); savels(ikr(k),1,720); upd($b,k);}
+    }); thumb();
+  }catch(e){console.error('Hydrate imgs error:',e);}
+};
+
+// Live updates desde Firebase
+let iun=null; const isub=()=>{
+  const {currentUser:u}=auth, email=u?.email; if(!email) return; iun?.(); 
+  iun=onSnapshot(query(collection(db,'smileimgs'),where('email','==',email),limit(60)),sn=>{
+    sn.docChanges().forEach(({type,doc})=>{
+      if(type==='removed') return;
+      const {imagen:src,...d}=doc.data()||{}, k=doc.id.split('_')[1]||'im1', $b=$bx.filter(`[data-k="${k}"]`);
+      if(src&&$b.length&&!getls(ikd(k))){$b.attr('data-src',src).addClass('fill').html(`<img src="${src}">`); savels(k,src,720); savels(ikr(k),1,720); upd($b,k);}
+    }); thumb();
+  },e=>console.error('Snapshot imgs error:',e));
+};
+
+// Eliminar imagen (local + remoto)
+const idel=async k=>{
+  const {currentUser:u}=auth, email=u?.email;
+  try{email&&await deleteDoc(doc(db,'smileimgs',`${email}_${k}`));}catch(e){console.error('Delete img error:',e);}
+  [k,ikd(k),ikr(k)].forEach(removels); $bx.filter(`[data-k="${k}"]`).removeAttr('data-src').removeClass('fill').empty(); thumb(); Mensaje('Imagen eliminada');
+};
+
+// Visor fullscreen + navegación
+const show=i=>{const s=$bx.eq(i).attr('data-src'); if(!s) return; ci=i; $im.attr('src',s); $vw.addClass('show'); thumb(); const $ti=$th.find(`[data-i="${i}"]`).addClass('on'); $ti.length&&$th.animate({scrollLeft:Math.max(0,$ti.position().left+$th.scrollLeft()-($th.width()-$ti.width())/2)},180);};
 const hide=()=>{$vw.removeClass('show'); ci=-1;};
-const nx =()=>{const L=lst(); if(!L.length)return hide(); show(L[(L.indexOf(ci)+1)%L.length]);};
-const pv =()=>{const L=lst(); if(!L.length)return hide(); show(L[(L.indexOf(ci)-1+L.length)%L.length]);};
-const dl =()=>{const a=$('<a>').attr({href:$im.attr('src'),download:`wiimage-${ci+1}.png`}).appendTo('body'); a[0].click(); a.remove();};
-const rm =()=>{const $b=$bx.eq(ci); removels($b.attr('data-k')); $b.removeAttr('data-src').removeClass('fill').empty(); thumb(); const L=lst(); L.length?show(L[0]):hide();};
+const nav=dir=>{const L=lst(); if(!L.length) return hide(); show(L[(L.indexOf(ci)+dir+L.length)%L.length]);};
+const dl=()=>{const a=Object.assign(document.createElement('a'),{href:$im.attr('src'),download:`wiimage-${ci+1}.png`}); document.body.append(a); a.click(); a.remove();};
+const rm=async()=>{const k=$bx.eq(ci).attr('data-k'); await idel(k); const L=lst(); L.length?show(L[0]):hide();};
 
+// Eventos UI del visor
 $(document).on('click','.ibx .bx',e=>{const i=$bx.index(e.currentTarget); $(e.currentTarget).attr('data-src')&&show(i);});
-$(document).on('click','.vw .cls, .vw',e=>{if(e.target===e.currentTarget||$(e.target).closest('.cls').length) hide();});
-$(document).on('click','.vw .nx',nx); $(document).on('click','.vw .pv',pv); $(document).on('click','.vw .dl',dl); $(document).on('click','.vw .rm',rm);
+$(document).on('click','.vw .cls',hide);
+$(document).on('click','.vw',e=>{if(e.target===e.currentTarget) hide();});
+$(document).on('click','.vw .nx',()=>nav(1));
+$(document).on('click','.vw .pv',()=>nav(-1));
+$(document).on('click','.vw .dl',dl);
+$(document).on('click','.vw .rm',rm);
+$(document).on('click','.vw .dw',syncManual); // NUEVO: Sync manual con botón
 $(document).on('click','.vw .th .ti',e=>show(+$(e.currentTarget).data('i')));
 
-// Teclado: > sig, < ant, Esc salir, Ctrl+S guardar, Supr eliminar
+// Atajos de teclado en visor
 $(document).on('keydown',e=>{
   if(!$vw.hasClass('show')) return;
-  if(e.ctrlKey&&(e.key==='s'||e.key==='S')) return e.preventDefault(), dl();
+  if(e.ctrlKey&&['s','S'].includes(e.key)) return e.preventDefault(),dl();
   if(e.key==='Escape') return hide();
-  if(e.key==='ArrowRight'||e.key==='>'||e.key=== '.') return nx();
-  if(e.key==='ArrowLeft'||e.key==='<'||e.key=== ',') return pv();
-  if(e.key==='Delete'||e.key==='Supr'||e.key==='Backspace') return rm();
+  if(['ArrowRight','>','.'].includes(e.key)) return nav(1);
+  if(['ArrowLeft','<',','].includes(e.key)) return nav(-1);
+  if(['Delete','Supr','Backspace'].includes(e.key)) return rm();
+  if(e.key===' ') return e.preventDefault(),syncManual(); // Espaciadora para sync manual
 });
 
-$('.bt_borrar').click(function(){
+// Botón "Borrar todo" (notas + imágenes)
+$(document).on('click','.bt_borrar',async function(){
   if(!confirm('¿Eliminar todo lo guardado?')) return;
-  try{ localStorage.clear(); }catch(_){ Object.keys(localStorage).forEach(k=>localStorage.removeItem(k)); }
-  // Notas
-  $('[data-ki^="ki"]').remove(); $tx.removeAttr('id').empty(); cont=0;
-  // Imágenes
-  $bx.removeAttr('data-src').removeClass('fill').empty(); thumb && thumb(); $vw.removeClass('show'); ci=-1;
-  // Feedback
+  try{localStorage.clear();}catch(_){Object.keys(localStorage).forEach(k=>localStorage.removeItem(k));}
+  $('[data-ki^="ki"]').remove(); $('.txe').removeAttr('id').empty(); cnt=0;
+  $bx.removeAttr('data-src').removeClass('fill').empty(); hide(); thumb();
   adtm(this,'bta','Eliminado','Eliminar');
 });
-// JQUERY CONTENIDO [End] 
+
+// OPCIÓN 1: Auto-sync al ocultar pestaña (para desktop)
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') isyn({silent:true}); });
+
+// Inicialización
+(async()=>{await ihid(); isub();})();
+
+// JQUERY CONTENIDO JS [End] 
 
 }// DIOS SIEMPRE ES BUENO Y YO AMO A DIOS [START]
 
